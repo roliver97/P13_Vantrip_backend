@@ -23,3 +23,27 @@ const isAuth = async (req, res, next) => {
     return next(error)
   }
 }
+
+const isAdmin = (req, res, next) => {
+  if (req.user.role === 'admin') {
+    return next()
+  }
+  return next(setError(403, 'Forbidden: Admin access required ⛔'))
+}
+
+const isSelfOrAdmin = (req, res, next) => {
+  const { id } = req.params
+
+  if (req.user.role === 'admin' || req.user._id.toString() === id) {
+    return next()
+  }
+
+  return next(
+    setError(
+      403,
+      'Forbidden: You cannot modify other users unless you are an admin.⛔'
+    )
+  )
+}
+
+module.exports = { isAuth, isAdmin, isSelfOrAdmin }
