@@ -38,4 +38,20 @@ const register = async (req, res, next) => {
   }
 }
 
-module.exports = { register }
+const getUser = async (req, res, next) => {
+  const { id } = req.params
+
+  try {
+    const user = await User.findById(id)
+    /* .populate('favorites')
+      .populate('postedCampers') */
+    if (!user) {
+      return next(setError(404, 'User not found 🔍'))
+    }
+    return res.status(200).json(user)
+  } catch (error) {
+    next(error)
+  }
+}
+
+module.exports = { register, getUser }
