@@ -47,13 +47,20 @@ const getUser = async (req, res, next) => {
   const { id } = req.params
 
   try {
-    const user = await User.findById(id)
-      .populate('favorites')
-      .populate('postedCampers')
+    const user = await User.findById(id).populate('favorites postedCampers')
     if (!user) {
       return next(setError(404, 'User not found 🔍'))
     }
     return res.status(200).json(user)
+  } catch (error) {
+    return next(error)
+  }
+}
+
+const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find()
+    return res.status(200).json(users)
   } catch (error) {
     return next(error)
   }
@@ -90,4 +97,19 @@ const login = async (req, res, next) => {
   }
 }
 
-module.exports = { register, getUser, login }
+const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id)
+
+    if (!user) {
+      return next(setError(404, 'User not found🔍'))
+    }
+    return res.status(200).json(user)
+  } catch (error) {
+    return next(error)
+  }
+}
+//? Frontend: Check if the token exists and has not expired. Then switch to backend.
+//? Backend: Use the `/users/me` endpoint when `App.jsx` starts to verify the user's identity and return the active profile.
+
+module.exports = { register, getUser, getUsers, login, getMe }
