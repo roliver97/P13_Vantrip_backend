@@ -1,11 +1,16 @@
 const { generateToken } = require('../../config/jwt')
 const setError = require('../../utils/setError')
 const User = require('../models/User')
+const bcrypt = require('bcrypt')
 
 const register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, username, password } = req.body
-    const userExists = await User.findOne({ $or: [{ email }, { username }] })
+    const formattedEmail = email.toLowerCase().trim()
+    const formattedUsername = username.trim()
+    const userExists = await User.findOne({
+      $or: [{ email: formattedEmail }, { username: formattedUsername }]
+    })
     if (userExists) {
       return next(setError(409, 'This email or username is already in use ⚠️'))
     }
@@ -18,8 +23,8 @@ const register = async (req, res, next) => {
     const newUser = new User({
       firstName,
       lastName,
-      email,
-      username,
+      email: formattedEmail,
+      username: formattedUsername,
       password,
       avatar
     })
@@ -43,15 +48,46 @@ const getUser = async (req, res, next) => {
 
   try {
     const user = await User.findById(id)
-    /* .populate('favorites')
-      .populate('postedCampers') */
+      .populate('favorites')
+      .populate('postedCampers')
     if (!user) {
       return next(setError(404, 'User not found 🔍'))
     }
     return res.status(200).json(user)
   } catch (error) {
-    next(error)
+    return next(error)
   }
 }
 
-module.exports = { register, getUser }
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body
+    const formattedEmail = email.toLowerCase().trim()
+
+    const user = await User.findOne({ email: formattedEmail }).select(
+      '+password'
+    ) //? The User model has select:false by default, so we need to import it manually
+    if (!user) {
+      return next(setError(400, 'Email or password are not correct ❌'))
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return next(setError(400, 'Email or password are not correct ❌'))
+    }
+
+    const token = generateToken(user._id)
+
+    const userResponse = user.toObject()
+    delete userResponse.password
+    return res.status(200).json({
+      message: `Welcome back, ${userResponse.firstName}!`,
+      token,
+      user: userResponse
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+module.exports = { register, getUser, login }

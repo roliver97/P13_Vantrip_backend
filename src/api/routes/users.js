@@ -1,8 +1,9 @@
 const usersRouter = require('express').Router()
-const { register, getUser } = require('../controllers/users')
+const { register, getUser, login } = require('../controllers/users')
 
 //STATIC ROUTES
 usersRouter.post('/register', register)
+usersRouter.post('/login', login)
 
 //DYNAMIC ROUTES
 usersRouter.get('/:id', getUser)
