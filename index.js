@@ -5,6 +5,7 @@ const { connectDB } = require('./src/config/db')
 const setError = require('./src/utils/setError')
 
 const usersRouter = require('./src/api/routes/users')
+const campersRouter = require('./src/api/routes/campers')
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use(cors())
 
 app.use('/api/v1/users', usersRouter)
+app.use('/api/v1/campers', campersRouter)
 
 app.use((req, res, next) => {
   return next(setError(404, 'Route not found'))
@@ -24,7 +26,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   //? Errors are now handled with `next(setError(...))` within each controller. However, for unexpected errors that we haven't handled, we use the default status code 500.
 
-  console.error('🔥 Server Error:', err) // For devs, with all the information
+  console.error('🔥 Server Error:', err.message) // For devs, with all the information
 
   // Native errors lack a status, so we explicitly default them to 500.
   // To prevent data leaks, we send a generic message on 500s; in contrast, our custom errors (e.g., 401, 409) are safe to expose to the frontend.
