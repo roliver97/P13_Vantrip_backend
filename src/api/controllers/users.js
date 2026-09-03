@@ -1,5 +1,6 @@
 const { generateToken } = require('../../config/jwt')
 const setError = require('../../utils/setError')
+const Camper = require('../models/Camper')
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 
@@ -112,4 +113,22 @@ const getMe = async (req, res, next) => {
 //? Frontend: Check if the token exists and has not expired. Then switch to backend.
 //? Backend: Use the `/users/me` endpoint when `App.jsx` starts to verify the user's identity and return the active profile.
 
-module.exports = { register, getUser, getUsers, login, getMe }
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const deletedUser = await User.findByIdAndDelete(id)
+
+    if (!deletedUser) {
+      return next(setError(404, 'User not found 🔍'))
+    }
+
+    return res.status(200).json({
+      message: `${deletedUser.username} was successfully deleted from Database! 🗑️`,
+      deletedUser
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+module.exports = { register, getUser, getUsers, login, getMe, deleteUser }
