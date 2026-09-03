@@ -5,7 +5,8 @@ const {
   login,
   getMe,
   getUsers,
-  deleteUser
+  deleteUser,
+  updateUser
 } = require('../controllers/users')
 const { isAuth, isAdmin, isSelfOrAdmin } = require('../../middlewares/auth')
 
@@ -18,5 +19,6 @@ usersRouter.get('/me', [isAuth], getMe) //? To check/verify my session
 //DYNAMIC ROUTES
 usersRouter.get('/:id', getUser)
 usersRouter.delete('/:id', [isAuth, isSelfOrAdmin], deleteUser)
+usersRouter.put('/:id', [isAuth, isSelfOrAdmin], updateUser)
 
 module.exports = usersRouter

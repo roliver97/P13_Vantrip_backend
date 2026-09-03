@@ -131,4 +131,66 @@ const deleteUser = async (req, res, next) => {
   }
 }
 
-module.exports = { register, getUser, getUsers, login, getMe, deleteUser }
+const updateUser = async (req, res, next) => {
+  try {
+    const { id } = req.params
+
+    if (req.body.password) {
+      return next(
+        setError(400, 'The password must be updated via the specified path🫷🏼')
+      )
+    }
+
+    const userToUpdate = await User.findById(id)
+    if (!userToUpdate) {
+      return next(setError(404, 'User not found 🔍'))
+    }
+
+    const itsMe = req.user._id.toString() === id
+
+    if (!itsMe && req.body.email) {
+      return next(
+        setError(403, 'The email field can only be changed by the user.🙅🏼‍♂️')
+      )
+    }
+
+    const { firstName, lastName, email, username, role } = req.body
+
+    if (firstName) userToUpdate.firstName = firstName.trim()
+    if (lastName) userToUpdate.lastName = lastName.trim()
+    if (username) userToUpdate.username = username.trim()
+    if (email) userToUpdate.email = email.toLowerCase().trim()
+
+    if (role) {
+      if (req.user.role === 'admin') {
+        userToUpdate.role = role
+      } else {
+        return next(
+          setError(403, 'You do not have permission to change the role.🙅🏼‍♂️')
+        )
+      }
+    }
+
+    const userUpdated = await userToUpdate.save() //
+
+    const userResponse = userUpdated.toObject()
+    delete userResponse.password
+
+    return res.status(200).json({
+      message: 'Profile updated successfully! ✨',
+      user: userResponse
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+module.exports = {
+  register,
+  getUser,
+  getUsers,
+  login,
+  getMe,
+  deleteUser,
+  updateUser
+}
