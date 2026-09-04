@@ -6,7 +6,8 @@ const {
   getMe,
   getUsers,
   deleteUser,
-  updateUser
+  updateUser,
+  updatePassword
 } = require('../controllers/users')
 const { isAuth, isAdmin, isSelfOrAdmin } = require('../../middlewares/auth')
 
@@ -15,6 +16,7 @@ usersRouter.post('/register', register)
 usersRouter.post('/login', login)
 usersRouter.get('/', [isAuth, isAdmin], getUsers)
 usersRouter.get('/me', [isAuth], getMe) //? To check/verify my session
+usersRouter.patch('/update-password', [isAuth], updatePassword)
 
 //DYNAMIC ROUTES
 usersRouter.get('/:id', getUser)

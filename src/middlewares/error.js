@@ -12,7 +12,8 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError') {
     // for Mongoose Schema Validation Errors (e.g., regex constraints for passwords, required fields)
     statusCode = 400
-    message = Object.values(err.errors)[0].message
+    message = Object.values(err.errors)[0].message // Mongoose returns by default messages like "Path `email` is required." or "`guest` is not a valid enum value for path `role`."
+    //? We pick only the first validation error ([0]) to avoid overwhelming the user with a long list. As they fix each issue, subsequent validation errors will surface one at a time.
   }
 
   if (err.code === 11000) {

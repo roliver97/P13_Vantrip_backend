@@ -7,8 +7,8 @@ const bcrypt = require('bcrypt')
 const register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, username, password } = req.body
-    const formattedEmail = email.toLowerCase().trim()
-    const formattedUsername = username.trim()
+    const formattedEmail = email?.toLowerCase().trim()
+    const formattedUsername = username?.trim()
     const userExists = await User.findOne({
       $or: [{ email: formattedEmail }, { username: formattedUsername }]
     })
@@ -31,6 +31,7 @@ const register = async (req, res, next) => {
     })
 
     const userSaved = await newUser.save()
+    //Model schema validators trigger here. If the password or any field fails schema constraints, Mongoose throws a ValidationError, forwarded to the global error middleware via catch(error).
     const token = generateToken(userSaved._id)
     const userResponse = userSaved.toObject()
     delete userResponse.password
@@ -123,8 +124,7 @@ const deleteUser = async (req, res, next) => {
     }
 
     return res.status(200).json({
-      message: `${deletedUser.username} was successfully deleted from Database! 🗑️`,
-      deletedUser
+      message: `${deletedUser.username} was successfully deleted from Database! 🗑️`
     })
   } catch (error) {
     return next(error)
@@ -185,6 +185,46 @@ const updateUser = async (req, res, next) => {
   }
 }
 
+const updatePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body
+
+    if (!oldPassword || !newPassword) {
+      return next(
+        setError(400, 'Please provide both current and new password ⚠️')
+      )
+    }
+
+    if (oldPassword === newPassword) {
+      return next(
+        setError(400, 'The new password must be different from the old one 🫷🏼')
+      )
+    }
+
+    const currentUser = await User.findById(req.user._id).select('+password')
+
+    if (!currentUser) {
+      //safety net for deleted users who still have a valid token
+      return next(setError(404, 'User Not Found 🔍'))
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, currentUser.password)
+    if (!isMatch) {
+      return next(setError(400, 'The current password is not correct ❌'))
+    }
+
+    currentUser.password = newPassword
+    await currentUser.save()
+    // The model schema validator will trigger here. If newPassword fails the regex standards, Mongoose will throw a ValidationError, caught by catch(error) and handled by the global error middleware.
+
+    return res
+      .status(200)
+      .json({ message: 'Password updated succesfully 🔐✅' })
+  } catch (error) {
+    return next(error)
+  }
+}
+
 module.exports = {
   register,
   getUser,
@@ -192,5 +232,6 @@ module.exports = {
   login,
   getMe,
   deleteUser,
-  updateUser
+  updateUser,
+  updatePassword
 }

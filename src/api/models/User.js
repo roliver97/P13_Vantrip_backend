@@ -7,7 +7,18 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, trim: true },
     username: { type: String, required: true, unique: true, trim: true },
-    password: { type: String, required: true, select: false },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+      validate: {
+        validator: function (v) {
+          return /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(v)
+        },
+        message:
+          'The password must have a minimum of 8 characters, 1 capital letter and 1 number ✍🏼'
+      }
+    },
     role: {
       type: String,
       required: true,
