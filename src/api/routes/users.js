@@ -7,7 +7,8 @@ const {
   getUsers,
   deleteUser,
   updateUser,
-  updatePassword
+  updatePassword,
+  changeRole
 } = require('../controllers/users')
 const { isAuth, isAdmin, isSelfOrAdmin } = require('../../middlewares/auth')
 
@@ -22,5 +23,6 @@ usersRouter.patch('/update-password', [isAuth], updatePassword)
 usersRouter.get('/:id', getUser)
 usersRouter.delete('/:id', [isAuth, isSelfOrAdmin], deleteUser)
 usersRouter.put('/:id', [isAuth, isSelfOrAdmin], updateUser)
+usersRouter.patch('/:id/role', [isAuth, isAdmin], changeRole)
 
 module.exports = usersRouter

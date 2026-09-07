@@ -225,6 +225,33 @@ const updatePassword = async (req, res, next) => {
   }
 }
 
+const changeRole = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const user = await User.findById(id)
+
+    if (!user) {
+      return next(setError(404, 'User not found 🔍'))
+    }
+
+    if (user.role === 'user') {
+      user.role = 'admin'
+    } else {
+      user.role = 'user'
+    }
+
+    const userUpdated = await user.save()
+    const userResponse = userUpdated.toObject()
+    delete userResponse.password
+    return res.status(200).json({
+      message: `${userResponse.firstName}'s role was updated to '${userResponse.role}' successfully ✅`,
+      user: userResponse
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
 module.exports = {
   register,
   getUser,
@@ -233,5 +260,6 @@ module.exports = {
   getMe,
   deleteUser,
   updateUser,
-  updatePassword
+  updatePassword,
+  changeRole
 }
