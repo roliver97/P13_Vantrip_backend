@@ -1,5 +1,6 @@
 const { generateToken } = require('../../config/jwt')
 const setError = require('../../utils/setError')
+const { deleteFile } = require('../../utils/deleteFile')
 const Camper = require('../models/Camper')
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
@@ -123,6 +124,10 @@ const deleteUser = async (req, res, next) => {
       return next(setError(404, 'User not found 🔍'))
     }
 
+    if (deletedUser.avatar && deletedUser.avatar.includes('cloudinary')) {
+      await deleteFile(deletedUser.avatar)
+    }
+
     return res.status(200).json({
       message: `${deletedUser.username} was successfully deleted from Database! 🗑️`
     })
@@ -168,6 +173,23 @@ const updateUser = async (req, res, next) => {
         return next(
           setError(403, 'You do not have permission to change the role.🙅🏼‍♂️')
         )
+      }
+    }
+
+    const isCloudinary =
+      userToUpdate.avatar && userToUpdate.avatar.includes('cloudinary')
+    if (req.file) {
+      if (isCloudinary) {
+        await deleteFile(userToUpdate.avatar)
+      }
+
+      userToUpdate.avatar = req.file.path
+    } else {
+      const nameChanged = req.body.firstName || req.body.lastName
+      if (!isCloudinary && nameChanged) {
+        const fName = req.body.firstName || userToUpdate.firstName
+        const lName = req.body.lastName || userToUpdate.lastName
+        userToUpdate.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fName + '+' + lName)}&background=random`
       }
     }
 

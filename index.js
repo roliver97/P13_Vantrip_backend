@@ -7,11 +7,13 @@ const setError = require('./src/utils/setError')
 const usersRouter = require('./src/api/routes/users')
 const campersRouter = require('./src/api/routes/campers')
 const errorHandler = require('./src/middlewares/error')
+const { connectCloudinary } = require('./src/config/cloudinary')
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
 connectDB()
+connectCloudinary()
 app.use(express.json())
 app.use(cors())
 
