@@ -1,4 +1,4 @@
-User email,Camper code,Start date,End date,Total price,Status
+userEmail,camperCode,startDate,endDate,totalPrice,status
 arnau.molina@gmail.com,CAMPER_01,2026-06-10,2026-06-15,665,confirmed
 judit.vidal@gmail.com,CAMPER_02,2026-06-12,2026-06-16,475,confirmed
 hector.salvat@gmail.com,CAMPER_03,2026-06-15,2026-06-22,840,confirmed
