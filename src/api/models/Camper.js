@@ -26,12 +26,20 @@ const camperSchema = new mongoose.Schema(
     images: {
       type: [String],
       required: [true, 'Images are required'],
-      validate: {
-        validator: function (arr) {
-          return Array.isArray(arr) && arr.length > 0
+      validate: [
+        {
+          validator: function (arr) {
+            return Array.isArray(arr) && arr.length > 0
+          },
+          message: 'At least one camper image is required ⚠️'
         },
-        message: 'At least one camper image is required'
-      }
+        {
+          validator: function (arr) {
+            return Array.isArray(arr) && arr.length <= 8
+          },
+          message: 'A camper cannot have more than 8 images in total 🚫'
+        }
+      ]
     },
     location: { type: String, required: true },
     available: { type: Boolean, default: true }

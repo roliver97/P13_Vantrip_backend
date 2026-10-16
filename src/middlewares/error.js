@@ -1,5 +1,7 @@
 //! GLOBAL ERROR MANAGER
 
+const multer = require('multer')
+
 const errorHandler = (err, req, res, next) => {
   //? Errors are now handled with `next(setError(...))` within each controller. However, for unexpected errors that we haven't handled, we use the default status code 500.
   console.error('🔥 Server Error:', err.message) // For devs, with all the information
@@ -25,6 +27,18 @@ const errorHandler = (err, req, res, next) => {
 
   if (statusCode === 500) {
     message = 'Internal server error'
+  }
+
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      statusCode = 400
+      message =
+        'Too many files uploaded in a single request. Maximum allowed is 8 images per upload 🚫'
+    }
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      statusCode = 400
+      message = 'File is too large 📁'
+    }
   }
 
   return res.status(statusCode).json({ status: statusCode, message })

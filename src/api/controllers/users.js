@@ -1,7 +1,6 @@
 const { generateToken } = require('../../config/jwt')
 const setError = require('../../utils/setError')
 const { deleteFile } = require('../../utils/deleteFile')
-const Camper = require('../models/Camper')
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 
@@ -38,7 +37,7 @@ const register = async (req, res, next) => {
     delete userResponse.password
     return res.status(201).json({
       message: 'User registered successfully! 🎉',
-      token: token,
+      token,
       user: userResponse
     })
   } catch (error) {

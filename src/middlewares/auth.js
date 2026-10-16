@@ -1,3 +1,4 @@
+const Camper = require('../api/models/Camper')
 const User = require('../api/models/User')
 const { verifyToken } = require('../config/jwt')
 const setError = require('../utils/setError')
@@ -24,26 +25,59 @@ const isAuth = async (req, res, next) => {
   }
 }
 
-const isAdmin = (req, res, next) => {
-  if (req.user.role === 'admin') {
-    return next()
+const isAdmin = async (req, res, next) => {
+  try {
+    if (req.user.role === 'admin') {
+      return next()
+    }
+    return next(setError(403, 'Forbidden: Admin access required ⛔'))
+  } catch (error) {
+    return next(error)
   }
-  return next(setError(403, 'Forbidden: Admin access required ⛔'))
 }
 
-const isSelfOrAdmin = (req, res, next) => {
-  const { id } = req.params
+const isSelfOrAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params
 
-  if (req.user.role === 'admin' || req.user._id.toString() === id) {
-    return next()
-  }
+    if (req.user.role === 'admin' || req.user._id.toString() === id) {
+      return next()
+    }
 
-  return next(
-    setError(
-      403,
-      'Forbidden: You cannot modify other users unless you are an admin.⛔'
+    return next(
+      setError(
+        403,
+        'Forbidden: You cannot modify other users unless you are an admin.⛔'
+      )
     )
-  )
+  } catch (error) {
+    return next(error)
+  }
 }
 
-module.exports = { isAuth, isAdmin, isSelfOrAdmin }
+const isCamperOwnerOrAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const camper = await Camper.findById(id)
+
+    if (!camper) return next(setError(404, 'Camper not found 🔍'))
+
+    const isOwner = camper.owner.toString() === req.user._id.toString()
+    const isAdmin = req.user.role === 'admin'
+
+    if (!isAdmin && !isOwner)
+      return next(
+        setError(
+          403,
+          '⛔Forbidden: You can only modify your own campers unless you are an admin.'
+        )
+      )
+
+    req.camper = camper
+    return next()
+  } catch (error) {
+    return next(error)
+  }
+}
+
+module.exports = { isAuth, isAdmin, isSelfOrAdmin, isCamperOwnerOrAdmin }
