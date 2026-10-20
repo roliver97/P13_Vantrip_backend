@@ -72,6 +72,18 @@ const createBooking = async (req, res, next) => {
   }
 }
 
+const getBookings = async (req, res, next) => {
+  try {
+    const bookings = await Booking.find()
+    return res.status(200).json({
+      message: '✅ The search for bookings was successful',
+      bookings
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
 const getBooking = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -85,4 +97,24 @@ const getBooking = async (req, res, next) => {
   }
 }
 
-module.exports = { createBooking, getBooking }
+const cancelBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const booking = await Booking.findById(id)
+    if (!booking) {
+      return next(setError(404, 'Booking not found 🔍'))
+    }
+
+    booking.status = 'cancelled'
+    await booking.save()
+
+    return res.status(200).json({
+      message: 'Booking cancelled successfully! 🚫',
+      booking
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+module.exports = { createBooking, getBooking, getBookings, cancelBooking }
