@@ -31,7 +31,7 @@ const seedCampers = async (usersMap) => {
         brand: rawCamper.brand,
         modelName: rawCamper.modelName,
         owner: ownerUser._id,
-        pricePerDay: Number(rawCamper.pricePerDay),
+        defaultPricePerDay: Number(rawCamper.defaultPricePerDay),
         cleaningFee: Number(rawCamper.cleaningFee) || 30,
         weeklyDiscount: Number(rawCamper.weeklyDiscount) || 10,
         capacity: Number(rawCamper.capacity),

@@ -175,7 +175,7 @@ const updateCamper = async (req, res, next) => {
       title,
       brand,
       modelName,
-      pricePerDay,
+      defaultPricePerDay,
       cleaningFee,
       weeklyDiscount,
       seasonalPricing,
@@ -192,8 +192,8 @@ const updateCamper = async (req, res, next) => {
       camperToUpdate.description = description.trim()
     if (location) camperToUpdate.location = location.trim()
 
-    if (pricePerDay !== undefined)
-      camperToUpdate.pricePerDay = Number(pricePerDay)
+    if (defaultPricePerDay !== undefined)
+      camperToUpdate.defaultPricePerDay = Number(defaultPricePerDay)
     if (cleaningFee !== undefined)
       camperToUpdate.cleaningFee = Number(cleaningFee)
     if (weeklyDiscount !== undefined)

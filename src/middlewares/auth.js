@@ -1,3 +1,4 @@
+const Booking = require('../api/models/Booking')
 const Camper = require('../api/models/Camper')
 const User = require('../api/models/User')
 const { verifyToken } = require('../config/jwt')
@@ -80,4 +81,35 @@ const isCamperOwnerOrAdmin = async (req, res, next) => {
   }
 }
 
-module.exports = { isAuth, isAdmin, isSelfOrAdmin, isCamperOwnerOrAdmin }
+const isBookingOwnerOrAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const booking = await Booking.findById(id)
+
+    if (!booking) return next(setError(404, 'Booking not found 🔍'))
+
+    const isOwner = booking.user.toString() === req.user._id.toString()
+    const isAdmin = req.user.role === 'admin'
+
+    if (!isAdmin && !isOwner)
+      return next(
+        setError(
+          403,
+          '⛔Forbidden: You can only modify your own bookings unless you are an admin.'
+        )
+      )
+
+    req.booking = booking
+    return next()
+  } catch (error) {
+    return next(error)
+  }
+}
+
+module.exports = {
+  isAuth,
+  isAdmin,
+  isSelfOrAdmin,
+  isCamperOwnerOrAdmin,
+  isBookingOwnerOrAdmin
+}

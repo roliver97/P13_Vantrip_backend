@@ -10,15 +10,15 @@ const camperSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
-    pricePerDay: { type: Number, required: true, min: 0 }, // Ex: 95€
+    defaultPricePerDay: { type: Number, required: true, min: 0 }, // e.g.: 95€
     cleaningFee: { type: Number, default: 30, min: 0 },
     weeklyDiscount: { type: Number, default: 10, min: 0, max: 100 },
     seasonalPricing: [
       {
-        seasonName: { type: String }, // Ex: Summer / August ...
+        seasonName: { type: String }, // e.g.: Summer / August ...
         startDate: { type: Date },
         endDate: { type: Date },
-        pricePerDay: { type: Number } // Ex: 130€ instead of 95€
+        seasonalPricePerDay: { type: Number } // e.g.: 130€ instead of 95€
       }
     ],
     capacity: { type: Number, required: true, min: 1 },
@@ -42,7 +42,7 @@ const camperSchema = new mongoose.Schema(
       ]
     },
     location: { type: String, required: true },
-    available: { type: Boolean, default: true }
+    available: { type: Boolean, default: true } // e.g.: active / discontinued / in the workshop... not applicable to conflicts between bookings
   },
   { timestamps: true, collection: 'campers' }
 )
