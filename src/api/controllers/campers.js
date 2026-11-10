@@ -108,7 +108,10 @@ const getCampers = async (req, res, next) => {
       // Since the booking schema defines `camper` with the type `mongoose.Schema.Types.ObjectId`, `booking.camper` will return the ID directly, not the entire camper object. It would be different if we used `.populate` within the schema, but that is not the case here.
     }
 
-    const campers = await Camper.find(queryConditions) // if queryConditions is {}, it will return all of them
+    const campers = await Camper.find(queryConditions).populate(
+      'owner',
+      'firstName lastName username avatar'
+    ) // if queryConditions is {}, it will return all of them
     return res.status(200).json({
       message: '✅ The search for campers was successful',
       searchItems: campers.length,
